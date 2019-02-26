@@ -82,8 +82,6 @@ exports.createPages = ({ graphql, actions }) => {
                     id
                     title
                     slug
-                    excerpt
-                    content
                   }
                 }
               }
