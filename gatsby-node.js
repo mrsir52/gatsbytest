@@ -13,7 +13,12 @@ const slash = require(`slash`)
 // Will create pages for WordPress posts (route : /post/{slug})
 exports.createPages = ({ graphql, actions }) => {
   const { createPage, createRedirect } = actions
-  createRedirect({ fromPath: '/', toPath: '/home', redirectInBrowser: true, isPermanent: true })
+  // createRedirect({
+  //   fromPath: "/",
+  //   toPath: "/home",
+  //   redirectInBrowser: true,
+  //   isPermanent: true,
+  // })
   return new Promise((resolve, reject) => {
     // The “graphql” function allows us to run arbitrary
     // queries against the local WordPress graphql schema. Think of
@@ -33,7 +38,6 @@ exports.createPages = ({ graphql, actions }) => {
                 template
                 title
                 content
-                template
               }
             }
           }
@@ -47,7 +51,7 @@ exports.createPages = ({ graphql, actions }) => {
         }
 
         // Create Page pages.
-        const pageTemplate = path.resolve("./src/templates/pageTemplate.js")
+        const pageTemplate = path.resolve("./src/templates/page.js")
         // We want to create a detailed page for each
         // page node. We'll just use the WordPress Slug for the slug.
         // The Page ID is prefixed with 'PAGE_'
@@ -63,9 +67,7 @@ exports.createPages = ({ graphql, actions }) => {
             // can query data specific to each page.
             path: `/${edge.node.slug}/`,
             component: slash(pageTemplate),
-            context: {
-                id: edge.node.id,
-              },
+            context: edge.node,
           })
         })
       })
@@ -77,10 +79,13 @@ exports.createPages = ({ graphql, actions }) => {
           `
             {
               allWordpressPost {
-                edges{
-                  node{
+                edges {
+                  node {
                     id
                     title
+                    slug
+                    excerpt
+                    content
                   }
                 }
               }
@@ -91,7 +96,7 @@ exports.createPages = ({ graphql, actions }) => {
             console.log(result.errors)
             reject(result.errors)
           }
-          const postTemplate = path.resolve("./src/templates/postTemplate")
+          const postTemplate = path.resolve("./src/templates/post.js")
           // We want to create a detailed page for each
           // post node. We'll just use the WordPress Slug for the slug.
           // The Post ID is prefixed with 'POST_'
@@ -99,9 +104,7 @@ exports.createPages = ({ graphql, actions }) => {
             createPage({
               path: `/post/${edge.node.slug}/`,
               component: slash(postTemplate),
-              context: {
-                id: edge.node.id,
-              },
+              context: edge.node,
             })
           })
           resolve()
